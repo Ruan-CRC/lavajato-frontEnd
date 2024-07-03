@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createPinia, setMapStoreSuffix } from 'pinia'
 
 
 import App from './App.vue'
@@ -9,6 +9,7 @@ import router from './router/index'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 
+setMapStoreSuffix('')
 
 const vuetify = createVuetify()
 const pinia = createPinia()

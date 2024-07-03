@@ -14,14 +14,19 @@ export const useCalendarStore = defineStore('calendar', {
     weekendsIsVisible: state => state.weekendsVisible
   },
   actions: {
-    createEvent ({ commit }, event) {
-      return commit(Mutation.CREATE_EVENT, event)
+    createEvent (event) {
+      this.events.push(event)
     },
-    updateEvent ({ commit }, updatedEvent) {
-      return commit(Mutation.UPDATE_EVENT, updatedEvent)
+    updateEvent (eventId) {
+      this.events = this.events.map(event => {
+        if (event.id === eventId) {
+          return { ...event, title: 'Updated' }
+        }
+        return event
+      })
     },
-    deleteEvent ({ commit }, eventId) {
-      return commit(Mutation.DELETE_EVENT, eventId)
+    deleteEvent ( eventId) {
+      this.events = this.events.filter(event => event.id !== eventId)
     },
     setweekendsVisible ({ commit }, enabled) {
       return commit(Mutation.SET_WEEKENDS_ENABLED, enabled)

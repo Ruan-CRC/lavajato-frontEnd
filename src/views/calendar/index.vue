@@ -27,6 +27,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import ptlocale from '@fullcalendar/core/locales/pt-br'
 
 import CalendarSidebar from './CalendarSidebar.vue'
 import { useCalendarStore } from '@/stores/CalendarStore'
@@ -60,6 +61,7 @@ computed: {
     return {
       editable: true,
       selectable: true,
+      locale: ptlocale,
       selectMirror: true,
       dayMaxEvents: true,
       events: this.calendar.events,
@@ -86,6 +88,7 @@ computed: {
 },
 methods: {
   onDateClick (payload) {
+    console.log('onDateClick', payload)
     const title = prompt('Please enter a new title for your event')
 
     if (!title) {
@@ -104,8 +107,23 @@ methods: {
       allDay
     })
   },
-
+  setActiveButton(buttonType) {
+    const buttons = document.querySelectorAll('.fc-button-group button');
+    const buttonSelected =  document.querySelector('.fc-button-active');
+    
+    buttons.forEach(button => {
+      const isMonthButton = button.classList.contains('fc-dayGridMonth-button');
+      const atributo = button.getAttribute('aria-pressed');
+      console.log(atributo);
+      if (buttonType === 'month' && atributo) {
+        button.setAttribute('aria-pressed', 'false');
+        button.classList.add('fc-button-active');
+      }
+    });
+  },
   onDateSelect (payload) {
+    console.log('chama')
+    this.setActiveButton('month');
     return this.onDateClick(payload)
   },
 

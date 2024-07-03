@@ -1,0 +1,34 @@
+@import '@/assets/sass/extends';
+
+#master {
+  @extend %alinha;
+  width: 100%;
+  height: 100vh;
+  background-image: linear-gradient(45deg, #4858CF, #C650C0);
+
+  #card {
+    width: 90%;
+    height: 89%;
+    background-color: whitesmoke;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: row;
+
+    #imgForm {
+      @extend %alinha;
+      width: 50%;
+    }
+
+    #form {
+      @extend %alinha;
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  #imgForm {
+    display: none !important;
+  }
+}

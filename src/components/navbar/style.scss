@@ -1,0 +1,31 @@
+.wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  & img{
+    margin-left: 6rem;
+  }
+}
+nav {
+  margin-right: 6rem;
+  
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+
+    a {
+      text-decoration: none;
+      color: black;
+
+      &:hover {
+        color: rgba(0, 0, 0, 0.75);
+      }
+    }
+  }
+}
+
+.mobileDropDown {
+  margin-right: 45px;
+}

@@ -3,11 +3,12 @@
       <calendar-sidebar
           :events="events"
           :weekends-visible="weekendsVisible"
-          @set-weekends-visible="calendar.setweekendsVisible"
+          @set-weekends-visible="calendarStore.setweekendsVisible"
       />
 
       <div class="calendar">
           <full-calendar
+              ref="fullCalendarAPI"
               class="full-calendar"
               :options="config"
           >
@@ -40,12 +41,17 @@ components: {
 data() {
   return {
     events: [],
-    weekendsVisible: true
+    weekendsVisible: true,
+    calendarApi: null
   }
 },
 created() {
-  this.events = this.calendar.events
-  this.weekendsVisible = this.calendar.weekendsIsVisible
+  this.calendarStore.getEvents()
+  this.events = this.calendarStore.events
+  this.weekendsVisible = this.calendarStore.weekendsIsVisible
+},
+mounted() {
+  this.calendarApi = this.$refs.fullCalendarAPI.getApi()
 },
 computed: {
   ...mapStores(useCalendarStore),
@@ -64,8 +70,8 @@ computed: {
       locale: ptlocale,
       selectMirror: true,
       dayMaxEvents: true,
-      events: this.calendar.events,
-      weekends: this.calendar.weekendsIsVisible,
+      events: this.calendarStore.events,
+      weekends: this.calendarStore.weekendsIsVisible,
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       headerToolbar: {
         left: 'prev,next today',
@@ -88,9 +94,13 @@ computed: {
 },
 methods: {
   onDateClick (payload) {
-    console.log('onDateClick', payload)
-    const title = prompt('Please enter a new title for your event')
+    const container = document.querySelector('.fc-button-group button[aria-pressed="true"]')
+    if (container.innerHTML === "Mês") {
+      this.calendarApi.changeView('timeGridDay')
+      return
+    }
 
+    const title = prompt('Please enter a new title for your event')
     if (!title) {
       return
     }
@@ -98,7 +108,7 @@ methods: {
     const id = (this.events.length + 1) * 10
     const { start, end, date, allDay } = payload
 
-    return this.calendar.createEvent({
+    return this.calendarStore.createEvent({
       id,
       title,
       date,
@@ -107,25 +117,10 @@ methods: {
       allDay
     })
   },
-  setActiveButton(buttonType) {
-    const buttons = document.querySelectorAll('.fc-button-group button');
-    const buttonSelected =  document.querySelector('.fc-button-active');
-    
-    buttons.forEach(button => {
-      const isMonthButton = button.classList.contains('fc-dayGridMonth-button');
-      const atributo = button.getAttribute('aria-pressed');
-      console.log(atributo);
-      if (buttonType === 'month' && atributo) {
-        button.setAttribute('aria-pressed', 'false');
-        button.classList.add('fc-button-active');
-      }
-    });
-  },
-  onDateSelect (payload) {
+  /* donDateSelect (payload) {
     console.log('chama')
-    this.setActiveButton('month');
     return this.onDateClick(payload)
-  },
+  },*/
 
   onEventClick ({ event }) {
     const confirmed = confirm(`Are you sure you want to delete the event '${event.title}'?`)
@@ -134,11 +129,11 @@ methods: {
       return
     }
 
-    return this.calendar.deleteEvent(event.id)
+    return this.calendarStore.deleteEvent(event.id)
   },
 
   onEventDrop ({ event }) {
-    return this.calendar.updateEvent(event)
+    return this.calendarStore.updateEvent(event)
   }
 }
 }

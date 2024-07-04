@@ -1,12 +1,9 @@
 import { defineStore } from 'pinia'
+import axios from 'axios'
 
-export const useCalendarStore = defineStore('calendar', {
+export const useCalendarStore = defineStore('calendarStore', {
   state: () => ({
-    events: [
-      { id: 10, title: 'All day event', date: new Date(), allDay: true },
-      { id: 20, title: 'Timed event', start: new Date() },
-      { id: 30, title: 'Timed event', start: new Date() }
-    ],
+    events: [],
     weekendsVisible: true
   }),
   getters: {
@@ -14,6 +11,19 @@ export const useCalendarStore = defineStore('calendar', {
     weekendsIsVisible: state => state.weekendsVisible
   },
   actions: {
+    async getEvents () {
+      var id = 1
+      await axios.get('http://localhost:3333/api/v1/agenda/servicos-agendos')
+        .then(response => {
+          response.data.data.servicosEmAgendamento.map(servicoAgendado => {
+            this.createEvent({
+              id: id++,
+              title: 'Já está agendado',
+              start: servicoAgendado.dataInicio,
+            })
+        })
+      })
+    },
     createEvent (event) {
       this.events.push(event)
     },

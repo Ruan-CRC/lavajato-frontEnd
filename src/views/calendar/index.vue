@@ -78,6 +78,13 @@ computed: {
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,timeGridDay'
       },
+      slotDuration: '01:00:00',
+      slotLabelFormat: {
+        hour: '1-',
+        minute: '2-digit',
+        omitZeroMinute: false,
+        meridiem: 'short'
+      },
       initialView: 'dayGridMonth'
     }
   },

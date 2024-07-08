@@ -11,7 +11,7 @@ export const useCalendarStore = defineStore('calendarStore', {
     weekendsIsVisible: state => state.weekendsVisible
   },
   actions: {
-    async getEvents () {
+    async getEvents() {
       var id = 1
       await axios.get('http://localhost:3333/api/v1/agenda/servicos-agendos')
         .then(response => {
@@ -21,13 +21,24 @@ export const useCalendarStore = defineStore('calendarStore', {
               title: 'Já está agendado',
               start: servicoAgendado.dataInicio,
             })
+          })
         })
-      })
+
+      const socket = io('http://localhost:3333')
+
+      socket.emit("agenda:join", "world", (response) => {
+        console.log(response); // "got it"
+      });
+
+      socket.on("agenda:join", (arg, callback) => {
+        console.log(arg); // "world"
+        callback("got it");
+      });
     },
-    createEvent (event) {
+    createEvent(event) {
       this.events.push(event)
     },
-    updateEvent (eventId) {
+    updateEvent(eventId) {
       this.events = this.events.map(event => {
         if (event.id === eventId) {
           return { ...event, title: 'Updated' }
@@ -35,14 +46,14 @@ export const useCalendarStore = defineStore('calendarStore', {
         return event
       })
     },
-    deleteEvent ( eventId) {
+    deleteEvent(eventId) {
       this.events = this.events.filter(event => event.id !== eventId)
     },
-    setweekendsVisible ({ commit }, enabled) {
+    setweekendsVisible({ commit }, enabled) {
       return commit(Mutation.SET_WEEKENDS_ENABLED, enabled)
     }
   },
   mutations: {
-    
+
   }
 })

@@ -55,7 +55,7 @@ const router = useRouter()
 
   // eslint-disable-next-line no-unused-vars
   const submit = handleSubmit(values => {
-    router.push({ name: 'home' })
+    router.push({ name: 'calendar' })
   })
 </script>
 <style lang="scss" scoped>

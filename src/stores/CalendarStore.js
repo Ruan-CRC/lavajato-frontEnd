@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+const socket = new WebSocket('http://localhost:3333');
+
 export const useCalendarStore = defineStore('calendarStore', {
   state: () => ({
     events: [],
@@ -15,25 +17,44 @@ export const useCalendarStore = defineStore('calendarStore', {
       var id = 1
       await axios.get('http://localhost:3333/api/v1/agenda/servicos-agendos')
         .then(response => {
+          if (response.data.data.servicosEmAgendamento) {
           response.data.data.servicosEmAgendamento.map(servicoAgendado => {
             this.createEvent({
               id: id++,
               title: 'Já está agendado',
               start: servicoAgendado.dataInicio,
             })
-          })
+          })}
         })
 
-      const socket = io('http://localhost:3333')
+        return new Promise((resolve, reject) => {
+          socket.addEventListener('open', () => {
+            console.log('Conectado ao servidor');
 
-      socket.emit("agenda:join", "world", (response) => {
-        console.log(response); // "got it"
-      });
+            socket.send(JSON.stringify('agenda:seed'));
+          });
 
-      socket.on("agenda:join", (arg, callback) => {
-        console.log(arg); // "world"
-        callback("got it");
-      });
+          socket.addEventListener('message', (event) => {
+            const events = JSON.parse(event.data);
+            if (events.event === 'agenda:agendados') {
+              console.log(`Event: ${events.event}, Payload: ${events.result}`);
+            }
+
+            console.log(events)
+            
+            this.createEvent({
+              id: id++,
+              title: 'Já está agendado',
+              start: events.dataInicio,
+            })
+            resolve(events);
+          });
+
+          socket.addEventListener('error', (error) => {
+            reject(error);
+          });
+        });
+
     },
     createEvent(event) {
       this.events.push(event)

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
-const socket = new WebSocket('http://localhost:3333');
+const socket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
 
 export const useCalendarStore = defineStore('calendarStore', {
   state: () => ({
@@ -13,25 +13,12 @@ export const useCalendarStore = defineStore('calendarStore', {
   },
   actions: {
     async getEvents() {
-      var id = 1
-      await axios.get('http://localhost:3333/api/v1/agenda/servicos-agendos')
-        .then(response => {
-          if (response.data.data.servicosEmAgendamento) {
-            response.data.data.servicosEmAgendamento.map(servicoAgendado => {
-              this.createEvent({
-                id: id++,
-                title: 'Já está agendado',
-                start: servicoAgendado.dataInicio,
-              })
-            })
-          }
-        })
-
+      var id = 0;
       return new Promise((resolve, reject) => {
         socket.addEventListener('open', () => {
           console.log('Conectado ao servidor');
 
-          socket.send(JSON.stringify('agenda:agendados'));
+          socket.send(JSON.stringify('agenda:seed'));
         });
 
         socket.addEventListener('message', (event) => {
@@ -40,11 +27,12 @@ export const useCalendarStore = defineStore('calendarStore', {
             console.log(`Event: ${events.event}, Payload: ${events.result}`);
           }
 
-          this.createEvent({
+          this.events.push({
             id: id++,
             title: 'Já está agendado',
             start: events.dataInicio,
           })
+
           resolve(events);
         });
 
@@ -55,7 +43,7 @@ export const useCalendarStore = defineStore('calendarStore', {
 
     },
     createEvent(event) {
-      this.dataEvent = event
+      this.events = event
     },
     updateEvent(eventId) {
       this.events = this.events.map(event => {

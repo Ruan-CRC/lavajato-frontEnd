@@ -46,7 +46,7 @@ data() {
   }
 },
 created() {
-  // this.calendarStore.getEvents()
+  this.calendarStore.getEvents()
   this.events = this.calendarStore.events
 },
 mounted() {

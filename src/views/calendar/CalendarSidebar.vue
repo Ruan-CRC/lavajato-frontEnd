@@ -53,7 +53,7 @@
 import { mapStores } from 'pinia'
 import { useCalendarStore } from '@/stores/CalendarStore'
 
-import instanceAxios from '../../api/axiosConfig';
+import api from '../../api/axiosConfig';
 
 export default {
   props: {
@@ -64,8 +64,8 @@ export default {
   },
   data() {
     return {
-      servicosItens: ['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming'],
-      veiculosItens: ['carro', 'moto', 'caminhão', 'buggy'],
+      servicosItens: [],
+      veiculosItens: [],
       allServiceValue: 0,
       form: {
         isDiskBusca: false,
@@ -101,6 +101,7 @@ export default {
   },
   created() {
     this.getVeiculosAPI()
+    this.getServicosAPI()
   },
   computed: {
     ...mapStores(useCalendarStore),
@@ -112,18 +113,39 @@ export default {
   methods: {
     async submitServicos() {
       const formIsValid = await this.$refs.formRef.validate();
-      console.log('formIsValid', formIsValid)
       if (formIsValid && !formIsValid.valid) return;
+      
       console.log('submitServicos', this.form)
     },
-    async getVeiculosAPI() {
-      await instanceAxios.get('/api/v1/veiculos/all')
+    getVeiculosAPI() {
+      api.get('/api/v1/veiculos/all')
         .then(response => {
-          console.log('response', response)
+          console.log('response', response.data)
+          let veiculosMap = new Map()
+          response.data.data.forEach(veiculo => {
+            veiculosMap.set(veiculo.tipo)
+          })
+
+          this.veiculosItens = veiculosMap
         })
         .catch(error => {
           console.log('error', error)
         })
+    },
+    getServicosAPI() {
+      api.get('api/v1/servicos/all')
+        .then(response => {
+          let servicosMap = new Map()
+          response.data.data.forEach(servico => {
+            servicosMap.set(servico.nome)
+          })
+
+          this.servicosItens = servicosMap
+        })
+        .catch(error => {
+          console.log('error', error)
+        })
+    
     }
   }
 }

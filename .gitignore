@@ -131,3 +131,4 @@ dist
 
 
 tmp.txt
+vite.config.js.timestamp-*

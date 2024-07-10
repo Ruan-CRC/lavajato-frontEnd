@@ -5,8 +5,6 @@ import { createPinia, setMapStoreSuffix } from 'pinia'
 import App from './App.vue'
 import router from './router/index'
 
-import instanceAxios from './api/axiosConfig'
-
 // Vuetify
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
@@ -21,4 +19,8 @@ app.config.errorHandler = (err) => {
   console.error(err)
 }
 
-app.use(router).use(instanceAxios).use(pinia).use(vuetify).mount('#app')
+app.use(router)
+app.use(pinia)
+app.use(vuetify)
+
+app.mount('#app')

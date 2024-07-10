@@ -19,6 +19,7 @@
     "@fullcalendar/vue3": "^6.1.14",
     "axios": "^1.6.7",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
     "pinia": "^2.1.7",
     "vee-validate": "^4.12.4",
     "vite-plugin-vuetify": "^2.0.1",

@@ -53,6 +53,8 @@
 import { mapStores } from 'pinia'
 import { useCalendarStore } from '@/stores/CalendarStore'
 
+import instanceAxios from '../../api/axiosConfig';
+
 export default {
   props: {
     events: {
@@ -97,6 +99,9 @@ export default {
       }
     }
   },
+  created() {
+    this.getVeiculosAPI()
+  },
   computed: {
     ...mapStores(useCalendarStore),
     dataAgenda() {
@@ -111,6 +116,15 @@ export default {
       if (formIsValid && !formIsValid.valid) return;
       console.log('submitServicos', this.form)
     },
+    async getVeiculosAPI() {
+      await instanceAxios.get('/api/v1/veiculos/all')
+        .then(response => {
+          console.log('response', response)
+        })
+        .catch(error => {
+          console.log('error', error)
+        })
+    }
   }
 }
 </script>

@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import api from '../api/axiosConfig'
 
-const socket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
+// const socket = io(import.meta.env.VITE_WEBSOCKET_URL);
+const socket = io('http://localhost:3334')
 
 export const useCalendarStore = defineStore('calendarStore', {
   state: () => ({
@@ -14,51 +15,38 @@ export const useCalendarStore = defineStore('calendarStore', {
   actions: {
     async getEvents() {
       var id = 0;
-      return new Promise((resolve, reject) => {
-        socket.addEventListener('open', () => {
-          console.log('Conectado ao servidor');
 
-          socket.send(JSON.stringify('agenda:all'));
-        });
-
-        socket.addEventListener('message', (event) => {
-          const events = JSON.parse(event.data);
-          console.log('Eventos', events);
-          if (events.event === 'agenda:agendados') {
-            console.log(`Event: ${events.event}, Payload: ${events.result}`);
-          }
-
-          if (events.event === 'agenda:now') {
-            this.events = [...this.events, {
-              id: id++,
-              title: 'Agora',
-              start: events.data.dataInicio,
-            }];
-
-            return;
-          }
-
-          events.result.servicosEmAgendamento.forEach(agenda => {
-            this.events.push({
-              id: id++,
-              title: 'Já está agendado',
-              start: agenda.dataInicio,
-            })
-          });
-          resolve(events);
-        });
-
-        socket.addEventListener('error', (error) => {
-          reject(error);
-        });
+      socket.on("connect", (io) => {
+        console.log(socket.id);
       });
 
+      socket.emit('agenda:all', '');
+
+      socket.on('agenda:create', (data) => {
+        console.log('Agendamento ---------', data)
+        this.events = [...this.events, {
+          id: id++,
+          title: 'Agora',
+          start: data.dataInicio,
+        }];
+      });
+
+      socket.on('agenda:all', (data) => {
+        data.servicosEmAgendamento.forEach(agenda => {
+          this.events.push({
+            id: id++,
+            title: 'Já está agendado',
+            start: agenda.dataInicio,
+          })
+        });
+      });
     },
     createEvent(event) {
       this.dataEvent = event
     },
     enviarAgendamento(event) {
-      api.post('api/v1/agenda/create', event)
+      console.log('Enviando agendamento', event);
+      socket.emit('agenda:create', event);
     },
     updateEvent(eventId) {
       this.events = this.events.map(event => {

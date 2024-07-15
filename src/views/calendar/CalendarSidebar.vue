@@ -129,7 +129,6 @@ export default {
     getVeiculosAPI() {
       api.get('/api/v1/veiculos/all')
         .then(response => {
-          console.log('response', response.data)
           response.data.data.forEach(veiculo => {
             this.veiculosItens.push(veiculo.nome)
           })
@@ -141,12 +140,9 @@ export default {
     getServicosAPI() {
       api.get('api/v1/servicos/all')
         .then(response => {
-          let servicosMap = new Map()
           response.data.data.forEach(servico => {
-            servicosMap.set(servico.nome)
+            this.servicosItens.push(servico.nome)
           })
-
-          this.servicosItens = servicosMap
         })
         .catch(error => {
           console.log('error', error)

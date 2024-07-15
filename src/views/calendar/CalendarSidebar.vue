@@ -114,19 +114,25 @@ export default {
     async submitServicos() {
       const formIsValid = await this.$refs.formRef.validate();
       if (formIsValid && !formIsValid.valid) return;
+
+      const servicos = this.form.servicos.map(servico => servico[0])
+      console.log('servicos', this.form.veiculos)
+
+      const data = {
+        veiculos: this.form.veiculos,
+        servicos: servicos,
+        dataInicio: this.form.dataInicio,
+      }
       
-      console.log('submitServicos', this.form)
+      this.calendarStore.enviarAgendamento(data)
     },
     getVeiculosAPI() {
       api.get('/api/v1/veiculos/all')
         .then(response => {
           console.log('response', response.data)
-          let veiculosMap = new Map()
           response.data.data.forEach(veiculo => {
-            veiculosMap.set(veiculo.tipo)
+            this.veiculosItens.push(veiculo.nome)
           })
-
-          this.veiculosItens = veiculosMap
         })
         .catch(error => {
           console.log('error', error)

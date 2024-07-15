@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '../api/axiosConfig'
 
 const socket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL);
 
@@ -18,21 +18,33 @@ export const useCalendarStore = defineStore('calendarStore', {
         socket.addEventListener('open', () => {
           console.log('Conectado ao servidor');
 
-          socket.send(JSON.stringify('agenda:seed'));
+          socket.send(JSON.stringify('agenda:all'));
         });
 
         socket.addEventListener('message', (event) => {
           const events = JSON.parse(event.data);
+          console.log('Eventos', events);
           if (events.event === 'agenda:agendados') {
             console.log(`Event: ${events.event}, Payload: ${events.result}`);
           }
 
-          this.events.push({
-            id: id++,
-            title: 'Já está agendado',
-            start: events.dataInicio,
-          })
+          if (events.event === 'agenda:now') {
+            this.events = [...this.events, {
+              id: id++,
+              title: 'Agora',
+              start: events.data.dataInicio,
+            }];
 
+            return;
+          }
+
+          events.result.servicosEmAgendamento.forEach(agenda => {
+            this.events.push({
+              id: id++,
+              title: 'Já está agendado',
+              start: agenda.dataInicio,
+            })
+          });
           resolve(events);
         });
 
@@ -43,7 +55,10 @@ export const useCalendarStore = defineStore('calendarStore', {
 
     },
     createEvent(event) {
-      this.events = event
+      this.dataEvent = event
+    },
+    enviarAgendamento(event) {
+      api.post('api/v1/agenda/create', event)
     },
     updateEvent(eventId) {
       this.events = this.events.map(event => {

@@ -10,6 +10,9 @@
                 :rules="fromRules.veiculos"
                 variant="solo"
                 :items="veiculosItens"
+                item-title="nome"
+                item-value="id"
+                return-object
               ></v-select>
 
               <v-select
@@ -18,6 +21,9 @@
                 :rules="fromRules.servicos"
                 variant="solo"
                 :items="servicosItens"
+                item-title="nome"
+                item-value="id"
+                return-object
                 multiple
               ></v-select>
 
@@ -84,7 +90,7 @@ export default {
         ],
         veiculos: [
           value => {
-            if (value.length > 0) return true
+            if (value.id) return true
 
             return 'Selecione ao menos um veículo'
           }
@@ -115,22 +121,19 @@ export default {
       const formIsValid = await this.$refs.formRef.validate();
       if (formIsValid && !formIsValid.valid) return;
 
-      const servicos = this.form.servicos.map(servico => servico[0])
-      console.log('servicos', this.form.veiculos)
-
       const data = {
-        veiculos: this.form.veiculos,
-        servicos: servicos,
+        veiculos: this.form.veiculos.id,
+        servicos: this.form.servicos.map(servico => servico.id),
         dataInicio: this.form.dataInicio,
       }
-      
+
       this.calendarStore.enviarAgendamento(data)
     },
     getVeiculosAPI() {
       api.get('/api/v1/veiculos/all')
         .then(response => {
           response.data.data.forEach(veiculo => {
-            this.veiculosItens.push(veiculo.nome)
+            this.veiculosItens.push(veiculo)
           })
         })
         .catch(error => {
@@ -141,7 +144,7 @@ export default {
       api.get('api/v1/servicos/all')
         .then(response => {
           response.data.data.forEach(servico => {
-            this.servicosItens.push(servico.nome)
+            this.servicosItens.push(servico)
           })
         })
         .catch(error => {

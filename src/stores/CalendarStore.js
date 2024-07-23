@@ -23,19 +23,20 @@ export const useCalendarStore = defineStore('calendarStore', {
       socket.emit('agenda:all', '');
 
       socket.on('agenda:create', (data) => {
-        console.log('Agendamento ---------', data)
-        this.events = [...this.events, {
+        console.log('5454', data);
+        this.events.push({
           id: id++,
-          title: 'Agora',
+          title: 'Agendado',
           start: data.dataInicio,
-        }];
+        });
       });
 
       socket.on('agenda:all', (data) => {
-        data.servicosEmAgendamento.forEach(agenda => {
+        console.log('-0-0-0', data);
+        data.forEach(agenda => {
           this.events.push({
             id: id++,
-            title: 'Já está agendado',
+            title: 'Agendado',
             start: agenda.dataInicio,
           })
         });
@@ -45,7 +46,6 @@ export const useCalendarStore = defineStore('calendarStore', {
       this.dataEvent = event
     },
     enviarAgendamento(event) {
-      console.log('Enviando agendamento', event);
       socket.emit('agenda:create', event);
     },
     updateEvent(eventId) {

@@ -1,12 +1,12 @@
 export const staticRouters = [
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/cadastro'
   },
   {
-    path: '/login',
-    name: 'login',
-    component: () => import('../views/login/index.vue')
+    path: '/cadastro',
+    name: 'cadastro',
+    component: () => import('../views/cadastro/index.vue')
   },
   {
     path: '/home',

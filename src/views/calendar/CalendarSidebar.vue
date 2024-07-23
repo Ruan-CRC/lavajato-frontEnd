@@ -10,7 +10,7 @@
                 :rules="fromRules.veiculos"
                 variant="solo"
                 :items="veiculosItens"
-                item-title="nome"
+                :item-title="item => item.nome + ' - ' + item.placa"
                 item-value="id"
                 return-object
               ></v-select>
@@ -58,6 +58,7 @@
 <script>
 import { mapStores } from 'pinia'
 import { useCalendarStore } from '@/stores/CalendarStore'
+import { useUserStore } from '@/stores/UserStore'
 
 import api from '../../api/axiosConfig';
 
@@ -73,6 +74,7 @@ export default {
       servicosItens: [],
       veiculosItens: [],
       allServiceValue: 0,
+      veiculosStor: null,
       form: {
         isDiskBusca: false,
         servicos: [],
@@ -106,11 +108,11 @@ export default {
     }
   },
   created() {
-    this.getVeiculosAPI()
     this.getServicosAPI()
+    this.getVeiculos()
   },
   computed: {
-    ...mapStores(useCalendarStore),
+    ...mapStores(useCalendarStore, useUserStore),
     dataAgenda() {
       this.form.dataInicio = this.calendarStore.dataEvent
       return this.calendarStore.dataEvent
@@ -127,23 +129,28 @@ export default {
         dataInicio: this.form.dataInicio,
       }
 
-      this.calendarStore.enviarAgendamento(data)
+      api.post('/api/v1/agenda/create', data)
     },
-    getVeiculosAPI() {
-      api.get('/api/v1/veiculos/all')
+    async getVeiculos() {
+      const veiculosUsuario = JSON.parse(localStorage.getItem('user&veiculo')).user.veiculos
+
+      let veiculosAPI
+      await api.get('/api/v1/veiculo/all')
         .then(response => {
-          response.data.data.forEach(veiculo => {
-            this.veiculosItens.push(veiculo)
-          })
+          veiculosAPI = response.data.data
         })
         .catch(error => {
           console.log('error', error)
         })
+
+        this.mesclaIdVeiculoComPlaca(veiculosUsuario, veiculosAPI).forEach(veiculo => {
+          this.veiculosItens.push(veiculo)
+        })
     },
     getServicosAPI() {
-      api.get('api/v1/servicos/all')
+      api.get('api/v1/servico/all')
         .then(response => {
-          response.data.data.forEach(servico => {
+          response.data.servicos.forEach(servico => {
             this.servicosItens.push(servico)
           })
         })
@@ -151,7 +158,19 @@ export default {
           console.log('error', error)
         })
     
-    }
+    },
+    mesclaIdVeiculoComPlaca(placas, tipos) {
+      const output = []
+      placas.map(veiculo => {
+        const tipo = tipos.find(t => t.id === veiculo.tipo);
+        output.push( {
+          id: veiculo.id,
+          nome: tipo ? tipo.nome : null,
+          placa: veiculo.placa
+        });
+      });
+      return output;
+    },
   }
 }
 </script>

@@ -62,6 +62,10 @@ computed: {
     }
   },
 
+  eventsStore() {
+    this.events = this.calendarStore.events
+  },
+
   configOptions () {
     return {
       editable: true,
@@ -70,7 +74,7 @@ computed: {
       selectMirror: true,
       dayMaxEvents: true,
       allDay: false,
-      events: this.calendarStore.events,
+      events: this.events,
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       headerToolbar: {
         left: 'prev,next today',

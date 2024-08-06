@@ -1,42 +1,52 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '../api/axiosConfig'
+
+// const socket = io(import.meta.env.VITE_WEBSOCKET_URL);
+const socket = io('http://localhost:3334')
 
 export const useCalendarStore = defineStore('calendarStore', {
   state: () => ({
     events: [],
-    weekendsVisible: true
+    dataEvent: 'selecione a data',
   }),
   getters: {
     allEvents: state => state.events,
-    weekendsIsVisible: state => state.weekendsVisible
   },
   actions: {
     async getEvents() {
-      var id = 1
-      await axios.get('http://localhost:3333/api/v1/agenda/servicos-agendos')
-        .then(response => {
-          response.data.data.servicosEmAgendamento.map(servicoAgendado => {
-            this.createEvent({
-              id: id++,
-              title: 'Já está agendado',
-              start: servicoAgendado.dataInicio,
-            })
-          })
-        })
+      var id = 0;
 
-      const socket = io('http://localhost:3333')
-
-      socket.emit("agenda:join", "world", (response) => {
-        console.log(response); // "got it"
+      socket.on("connect", (io) => {
+        console.log(socket.id);
       });
 
-      socket.on("agenda:join", (arg, callback) => {
-        console.log(arg); // "world"
-        callback("got it");
+      socket.emit('agenda:all', '');
+
+      socket.on('agenda:create', (data) => {
+        console.log('5454', data);
+        this.events.push({
+          id: id++,
+          title: 'Agendado',
+          start: data.dataInicio,
+        });
+      });
+
+      socket.on('agenda:all', (data) => {
+        console.log('-0-0-0', data);
+        data.forEach(agenda => {
+          this.events.push({
+            id: id++,
+            title: 'Agendado',
+            start: agenda.dataInicio,
+          })
+        });
       });
     },
     createEvent(event) {
-      this.events.push(event)
+      this.dataEvent = event
+    },
+    enviarAgendamento(event) {
+      socket.emit('agenda:create', event);
     },
     updateEvent(eventId) {
       this.events = this.events.map(event => {
@@ -49,9 +59,6 @@ export const useCalendarStore = defineStore('calendarStore', {
     deleteEvent(eventId) {
       this.events = this.events.filter(event => event.id !== eventId)
     },
-    setweekendsVisible({ commit }, enabled) {
-      return commit(Mutation.SET_WEEKENDS_ENABLED, enabled)
-    }
   },
   mutations: {
 

@@ -19,4 +19,8 @@ app.config.errorHandler = (err) => {
   console.error(err)
 }
 
-app.use(router).use(pinia).use(vuetify).mount('#app')
+app.use(router)
+app.use(pinia)
+app.use(vuetify)
+
+app.mount('#app')

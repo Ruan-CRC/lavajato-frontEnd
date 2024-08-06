@@ -1,10 +1,10 @@
 <script>
-import formLogin from '@/components/Forms/formLogin/index.vue'
+import formCadastro from '@/components/Forms/formCadastro/index.vue'
 import baseForms from '@/components/Forms/baseForms/index.vue'
 
 export default {
   components: {
-    formLogin,
+    formCadastro,
     baseForms
   },
 }
@@ -12,7 +12,7 @@ export default {
 
 <template>
   <base-forms>
-    <form-login></form-login>
+    <form-cadastro></form-cadastro>
   </base-forms>
 </template>
 <style lang="scss" scoped>

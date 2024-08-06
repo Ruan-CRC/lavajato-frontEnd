@@ -48,7 +48,6 @@ data() {
 created() {
   this.calendarStore.getEvents()
   this.events = this.calendarStore.events
-  this.weekendsVisible = this.calendarStore.weekendsIsVisible
 },
 mounted() {
   this.calendarApi = this.$refs.fullCalendarAPI.getApi()
@@ -63,6 +62,10 @@ computed: {
     }
   },
 
+  eventsStore() {
+    this.events = this.calendarStore.events
+  },
+
   configOptions () {
     return {
       editable: true,
@@ -70,8 +73,8 @@ computed: {
       locale: ptlocale,
       selectMirror: true,
       dayMaxEvents: true,
-      events: this.calendarStore.events,
-      weekends: this.calendarStore.weekendsIsVisible,
+      allDay: false,
+      events: this.events,
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       headerToolbar: {
         left: 'prev,next today',
@@ -80,7 +83,7 @@ computed: {
       },
       slotDuration: '01:00:00',
       slotLabelFormat: {
-        hour: '1-',
+        hour: '2-digit',
         minute: '2-digit',
         omitZeroMinute: false,
         meridiem: 'short'
@@ -102,27 +105,15 @@ computed: {
 methods: {
   onDateClick (payload) {
     const container = document.querySelector('.fc-button-group button[aria-pressed="true"]')
+
     if (container.innerHTML === "Mês") {
       this.calendarApi.changeView('timeGridDay')
       return
     }
 
-    const title = prompt('Please enter a new title for your event')
-    if (!title) {
-      return
-    }
+    const { date } = payload
 
-    const id = (this.events.length + 1) * 10
-    const { start, end, date, allDay } = payload
-
-    return this.calendarStore.createEvent({
-      id,
-      title,
-      date,
-      start,
-      end,
-      allDay
-    })
+    this.calendarStore.createEvent(date)
   },
   /* donDateSelect (payload) {
     console.log('chama')

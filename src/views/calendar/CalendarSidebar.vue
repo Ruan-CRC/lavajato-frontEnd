@@ -1,37 +1,66 @@
 <template>
   <div class="calendar-sidebar">
       <section class="instructions">
-          <h2>Instructions</h2>
+          <h2>Serviços</h2>
+          <v-sheet class="mx-auto" width="230">
+            <v-form ref="formRef" fast-fail validate-on="submit" @submit.prevent="submitServicos">
+              <v-select
+                v-model="form.veiculos"
+                label="Veículo"
+                :rules="fromRules.veiculos"
+                variant="solo"
+                :items="veiculosItens"
+                :item-title="item => item.nome + ' - ' + item.placa"
+                item-value="id"
+                return-object
+              ></v-select>
 
-          <ul>
-              <li>Select dates and you will be prompted to create a new event</li>
-              <li>Drag, drop, and resize events</li>
-              <li>Click an event to delete it</li>
-          </ul>
-      </section>
+              <v-select
+                v-model="form.servicos"
+                label="Serviço"
+                :rules="fromRules.servicos"
+                variant="solo"
+                :items="servicosItens"
+                item-title="nome"
+                item-value="id"
+                return-object
+                multiple
+              ></v-select>
 
-      <section class="quick-toggles">
-          <label>
-              <input type="checkbox" v-model="weekendsVisibleCheckbox">
-              Toggle weekends
-          </label>
+              <v-text-field
+                hide-details="auto"
+                :placeholder="dataAgenda"
+                v-model="form.dataInicio"
+                :rules="fromRules.dataInicio"
+                variant="solo"
+                prepend-inner-icon="mdi-calendar"
+                readonly
+              ></v-text-field>
+
+              <v-checkbox
+                v-model="form.isDiskBusca"
+                label="Disk-Busca"
+              ></v-checkbox>
+
+              <span class="ml-3">valor: {{ allServiceValue }}</span>
+
+              <v-btn class="mt-2" type="submit" block>Enviar</v-btn>
+            </v-form>
+          </v-sheet>
       </section>
 
       <section class="events-list">
-          <h2>All Events ({{ events.length }})</h2>
-
-          <ul>
-              <li v-for="event in events" :key="event.id">
-                  <b>{{ getFormattedDate(event) }}</b>
-                  <i>{{ event.title }}</i>
-              </li>
-          </ul>
+          <h2>Já Agendados: ({{ events.length }})</h2>
       </section>
   </div>
 </template>
 
 <script>
-import { format } from 'date-fns'
+import { mapStores } from 'pinia'
+import { useCalendarStore } from '@/stores/CalendarStore'
+import { useUserStore } from '@/stores/UserStore'
+
+import api from '../../api/axiosConfig';
 
 export default {
   props: {
@@ -39,34 +68,109 @@ export default {
       type: Array,
       required: true
     },
-    weekendsVisible: {
-      type: Boolean,
-      required: true
+  },
+  data() {
+    return {
+      servicosItens: [],
+      veiculosItens: [],
+      allServiceValue: 0,
+      veiculosStor: null,
+      form: {
+        isDiskBusca: false,
+        servicos: [],
+        veiculos: [],
+        dataInicio: '',
+        value: ''
+      },
+      fromRules: {
+        servicos: [
+          value => {
+            if (value.length > 0) return true
+
+            return 'Selecione ao menos um serviço'
+          }
+        ],
+        veiculos: [
+          value => {
+            if (value.id) return true
+
+            return 'Selecione ao menos um veículo'
+          }
+        ],
+        dataInicio: [
+          value => {
+            if (value !== 'selecione a data') return true
+
+            return 'Selecione uma data'
+          }
+        ]
+      }
     }
   },
+  created() {
+    this.getServicosAPI()
+    this.getVeiculos()
+  },
   computed: {
-    weekendsVisibleCheckbox: {
-      get () {
-        return this.weekendsVisible
-      },
-      set (value) {
-        return this.$emit('set-weekends-visible', value)
-      }
+    ...mapStores(useCalendarStore, useUserStore),
+    dataAgenda() {
+      this.form.dataInicio = this.calendarStore.dataEvent
+      return this.calendarStore.dataEvent
     }
   },
   methods: {
-    isAllDay (event) {
-      return (event.allDay !== undefined) ? event.allDay : false
-    },
-    getFormattedDate (event) {
-      const date = event.date || event.start
+    async submitServicos() {
+      const formIsValid = await this.$refs.formRef.validate();
+      if (formIsValid && !formIsValid.valid) return;
 
-      if (date === undefined) {
-        return ''
+      const data = {
+        veiculos: this.form.veiculos.id,
+        servicos: this.form.servicos.map(servico => servico.id),
+        dataInicio: this.form.dataInicio,
       }
 
-      return format(date, 'MMM d, yyyy')
-    }
+      api.post('/api/v1/agenda/create', data)
+    },
+    async getVeiculos() {
+      const veiculosUsuario = JSON.parse(localStorage.getItem('user&veiculo')).user.veiculos
+
+      let veiculosAPI
+      await api.get('/api/v1/veiculo/all')
+        .then(response => {
+          veiculosAPI = response.data.data
+        })
+        .catch(error => {
+          console.log('error', error)
+        })
+
+        this.mesclaIdVeiculoComPlaca(veiculosUsuario, veiculosAPI).forEach(veiculo => {
+          this.veiculosItens.push(veiculo)
+        })
+    },
+    getServicosAPI() {
+      api.get('api/v1/servico/all')
+        .then(response => {
+          response.data.servicos.forEach(servico => {
+            this.servicosItens.push(servico)
+          })
+        })
+        .catch(error => {
+          console.log('error', error)
+        })
+    
+    },
+    mesclaIdVeiculoComPlaca(placas, tipos) {
+      const output = []
+      placas.map(veiculo => {
+        const tipo = tipos.find(t => t.id === veiculo.tipo);
+        output.push( {
+          id: veiculo.id,
+          nome: tipo ? tipo.nome : null,
+          placa: veiculo.placa
+        });
+      });
+      return output;
+    },
   }
 }
 </script>

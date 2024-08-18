@@ -124,9 +124,9 @@ export default {
       if (formIsValid && !formIsValid.valid) return;
 
       const data = {
-        veiculos: this.form.veiculos.id,
-        servicos: this.form.servicos.map(servico => servico.id),
-        dataInicio: this.form.dataInicio,
+        veiculoId: this.form.veiculos.id,
+        servicoIds: this.form.servicos.map(servico => servico.id),
+        dataInicio: Date.parse(this.form.dataInicio),
       }
 
       api.post('/api/v1/agenda/create', data)

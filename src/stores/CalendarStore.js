@@ -2,7 +2,9 @@ import { defineStore } from 'pinia'
 import api from '../api/axiosConfig'
 
 // const socket = io(import.meta.env.VITE_WEBSOCKET_URL);
-const socket = io('http://localhost:3334')
+const socket = io('http://localhost:3333/', {
+  withCredentials: true
+})
 
 export const useCalendarStore = defineStore('calendarStore', {
   state: () => ({
@@ -15,6 +17,17 @@ export const useCalendarStore = defineStore('calendarStore', {
   actions: {
     async getEvents() {
       var id = 0;
+
+      await api.get('api/v1/agenda/servicos-agendos')
+        .then(response => {
+          response.data.forEach(agenda => {
+            this.events.push({
+              id: id++,
+              title: 'Agendado',
+              start: agenda.dataInicio,
+            })
+          });
+        })
 
       socket.on("connect", (io) => {
         console.log(socket.id);

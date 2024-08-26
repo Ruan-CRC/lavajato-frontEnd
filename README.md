@@ -1,35 +1,23 @@
-# crmvue
+# Projeto Frontend vue
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+Este é o frontend do sistema de agendamento para uma lava-jato. As funcionalidades disponíveis no frontend são exclusivamente para visualizar os agendamentos; outras funcionalidades não estão completamente implementadas.
 
 ## Project Setup
 
+1. Copie o arquivo de exemplo de variáveis de ambiente:
+
 ```sh
-yarn
+cp .env.example .env
 ```
 
 ### Compile and Hot-Reload for Development
 
-```sh
-yarn dev
-```
-
-### Compile and Minify for Production
+2. Execute o projeto em um contêiner Docker:
 
 ```sh
-yarn build
+docker run -p 4173:80 lavajato-front
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+3. Acesse o sistema em http://localhost:4173.
 
-```sh
-yarn lint
-```
+4. Insira dados fictícios para testar. Abra outra página ou navegador na agenda e veja o WebSocket em ação.

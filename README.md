@@ -15,6 +15,10 @@ cp .env.example .env
 2. Execute o projeto em um contêiner Docker:
 
 ```sh
+docker build -t lavajato-front .
+```
+
+```sh
 docker run -p 4173:80 lavajato-front
 ```
 

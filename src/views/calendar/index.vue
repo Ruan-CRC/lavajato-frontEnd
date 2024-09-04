@@ -1,7 +1,8 @@
 <template>
   <div id="calendarContainer">
       <calendar-sidebar
-          :events="events"
+          id="calendarSidebar"
+          :events="eventsStore"
           :weekends-visible="weekendsVisible"
           @set-weekends-visible="calendarStore.setweekendsVisible"
       />
@@ -18,6 +19,24 @@
               </template>
           </full-calendar>
       </div>
+  </div>
+  <div id="alertCalendar">
+    <v-alert
+      v-if="calendarStore.errorAgenda"
+      closable
+      :title="calendarStore.errorAgenda.title"
+      type="error"
+      @click:close="closeError"
+    >
+    {{ calendarStore.errorAgenda.detail }}
+    </v-alert>
+    <v-alert
+      v-if="calendarStore.agendaConfirmada"
+      closable
+      title="Agenda confirmada"
+      type="success"
+      @click:close="closeAgendaAlert"
+    >{{ calendarStore.agendaConfirmada }}</v-alert>
   </div>
 </template>
 
@@ -40,30 +59,28 @@ components: {
 },
 data() {
   return {
-    events: [],
     weekendsVisible: true,
-    calendarApi: null
+    calendarApi: null,
   }
 },
-created() {
-  this.calendarStore.getEvents()
-  this.events = this.calendarStore.events
+async created() {
+  await this.calendarStore.getEvents()
 },
 mounted() {
   this.calendarApi = this.$refs.fullCalendarAPI.getApi()
 },
 computed: {
-  ...mapStores(useCalendarStore),
+  ...mapStores(useCalendarStore, ['errorAgenda', 'agendaConfirmada']),
 
   config () {
     return {
-      ... this.configOptions,
+      ...this.configOptions,
       ...this.eventHandlers
     }
   },
 
   eventsStore() {
-    this.events = this.calendarStore.events
+    return this.calendarStore.events
   },
 
   configOptions () {
@@ -74,14 +91,14 @@ computed: {
       selectMirror: true,
       dayMaxEvents: true,
       allDay: false,
-      events: this.events,
+      events: this.calendarStore.events,
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
         right: 'dayGridMonth,timeGridWeek,timeGridDay'
       },
-      slotDuration: '01:00:00',
+      slotDuration: '00:30:00',
       slotLabelFormat: {
         hour: '2-digit',
         minute: '2-digit',
@@ -100,14 +117,20 @@ computed: {
       eventResize: this.onEventDrop,
       select: this.onDateSelect
     }
-  }
+  },
 },
 methods: {
+  closeAgendaAlert() {
+    this.calendarStore.agendaConfirmada = false
+  },
+  closeError() {
+    this.calendarStore.errorAgenda = false
+  },
   onDateClick (payload) {
     const container = document.querySelector('.fc-button-group button[aria-pressed="true"]')
 
     if (container.innerHTML === "Mês") {
-      this.calendarApi.changeView('timeGridDay')
+      this.calendarApi.changeView('timeGridDay', payload.dateStr)
       return
     }
 
@@ -120,19 +143,19 @@ methods: {
     return this.onDateClick(payload)
   },*/
 
-  onEventClick ({ event }) {
-    const confirmed = confirm(`Are you sure you want to delete the event '${event.title}'?`)
+  // onEventClick ({ event }) {
+  //   const confirmed = confirm(`Are you sure you want to delete the event '${event.title}'?`)
+  // 
+  //   if (!confirmed) {
+  //     return
+  //   }
+  // 
+  //   return this.calendarStore.deleteEvent(event.id)
+  // },
 
-    if (!confirmed) {
-      return
-    }
-
-    return this.calendarStore.deleteEvent(event.id)
-  },
-
-  onEventDrop ({ event }) {
-    return this.calendarStore.updateEvent(event)
-  }
+  // onEventDrop ({ event }) {
+  //   return this.calendarStore.updateEvent(event)
+  // }
 }
 }
 </script>
@@ -149,4 +172,23 @@ methods: {
 
       padding: 2em;
   }
+
+  #alertCalendar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 999;
+    padding: 10px;
+  }
+
+@media screen and (max-width: 640px) {
+  #calendarContainer {
+    flex-direction: column;
+  }
+
+  .calendar {
+    padding: 0;
+  }
+  
+}
 </style>

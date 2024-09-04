@@ -2,7 +2,7 @@
   <div class="calendar-sidebar">
       <section class="instructions">
           <h2>Serviços</h2>
-          <v-sheet class="mx-auto" width="230">
+          <v-sheet class="mx-auto">
             <v-form ref="formRef" fast-fail validate-on="submit" @submit.prevent="submitServicos">
               <v-select
                 v-model="form.veiculos"
@@ -127,9 +127,12 @@ export default {
         veiculoId: this.form.veiculos.id,
         servicoIds: this.form.servicos.map(servico => servico.id),
         dataInicio: Date.parse(this.form.dataInicio),
+        socket: this.calendarStore.socketId,
       }
 
-      api.post('/api/v1/agenda/create', data)
+      api.post('/api/v1/agenda/create', data).catch(error => {
+        this.calendarStore.addError(error.response.data);
+      })
     },
     async getVeiculos() {
       const veiculosUsuario = JSON.parse(localStorage.getItem('user&veiculo')).user.veiculos
@@ -177,7 +180,7 @@ export default {
 
 <style scoped>
     .calendar-sidebar {
-        width: 300px;
+        width: 30%;
         line-height: 1.5;
         background: #eaf9ff;
         border-right: 1px solid #d3e2e8;
@@ -201,4 +204,13 @@ export default {
         margin: 0;
         font-size: 16px;
     }
+@media screen and (max-width: 640px) {
+  .calendar-sidebar {
+        width: 100%;
+        line-height: 1.5;
+        background: #eaf9ff;
+        border-right: 1px solid #d3e2e8;
+    }
+  
+}
 </style>

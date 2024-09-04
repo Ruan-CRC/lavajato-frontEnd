@@ -94,6 +94,13 @@ export default {
             return 'Campo obrigatório'
           }
         ],
+        placa: [
+          value => {
+            const regex = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/i;
+            if (regex.test(value)) return true;
+            return 'Placa inválida. Formato esperado: AAA1111 ou AAA1A11';
+          }
+        ],
       }
     }
   },

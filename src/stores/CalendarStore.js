@@ -28,15 +28,18 @@ export const useCalendarStore = defineStore('calendarStore', {
       socket.emit('agenda:all', '');
 
       socket.on('agenda:create', (data) => {
+        let dataOriginal = new Date(data.dataInicio);
+        dataOriginal.setHours(dataOriginal.getHours() + 3);
+
         this.events.push({
           id: id++,
           title: 'Agendado',
-          start: data.dataInicio,
+          start: dataOriginal.toISOString(),
         });
       });
 
       socket.on('agenda:error', (data) => {
-        this.errorAgenda = data;
+        this.errorAgenda = data.error.errors[0];
       });
 
       socket.on('agenda:confirmada', (data) => {

@@ -114,7 +114,14 @@ export default {
   computed: {
     ...mapStores(useCalendarStore, useUserStore),
     dataAgenda() {
-      this.form.dataInicio = this.calendarStore.dataEvent
+      if (this.calendarStore.dataEvent.length > 0) {
+        this.form.dataInicio = this.calendarStore.dataEvent
+        return this.calendarStore.dataEvent
+      }
+      const data = new Date(this.calendarStore.dataEvent);
+      this.form.dataInicio = data.toLocaleDateString('pt-BR', {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
       return this.calendarStore.dataEvent
     }
   },
@@ -126,7 +133,7 @@ export default {
       const data = {
         veiculoId: this.form.veiculos.id,
         servicoIds: this.form.servicos.map(servico => servico.id),
-        dataInicio: Date.parse(this.form.dataInicio),
+        dataInicio: Date.parse(this.calendarStore.dataEvent),
         socket: this.calendarStore.socketId,
       }
 

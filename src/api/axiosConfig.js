@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from 'redaxios';
 import router from '../router/index'
 
 // Define as configurações padrões quando cria a instância
 const api = axios.create({
-  baseURL: import.meta.env.VITE_BASE_URL
+  baseURL: `${import.meta.env.VITE_BASE_URL}`
 });
 
 // Altera as configurações padrões após a instância ser criada

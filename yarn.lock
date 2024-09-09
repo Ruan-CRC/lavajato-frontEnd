@@ -1501,6 +1501,11 @@ readdirp@~3.6.0:
   dependencies:
     picomatch "^2.2.1"
 
+redaxios@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.npmjs.org/redaxios/-/redaxios-0.5.1.tgz"
+  integrity sha512-FSD2AmfdbkYwl7KDExYQlVvIrFz6Yd83pGfaGjBzM9F6rpq8g652Q4Yq5QD4c+nf4g2AgeElv1y+8ajUPiOYMg==
+
 resolve-from@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/resolve-from/-/resolve-from-4.0.0.tgz"

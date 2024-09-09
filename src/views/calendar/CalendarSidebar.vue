@@ -138,7 +138,7 @@ export default {
       }
 
       api.post('/api/v1/agenda/create', data).catch(error => {
-        this.calendarStore.addError(error.response.data);
+        this.calendarStore.addError(error.data);
       })
     },
     async getVeiculos() {
